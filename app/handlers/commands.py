@@ -9,7 +9,7 @@ router = Router(name="commands-router")
 
 
 @router.message(CommandStart())
-async def command_start(message: types.Message, _: AsyncSession):
+async def command_start(message: types.Message, session: AsyncSession):
     await message.answer("Hello World!")
 
 
