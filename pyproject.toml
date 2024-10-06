@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "t-trips"
+name = "trips-reminder-example"
 version = "0.1.0"
 description = "Write something about this project"
 authors = ["Your Name <you@example.com>"]
