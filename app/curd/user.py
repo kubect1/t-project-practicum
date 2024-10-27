@@ -15,27 +15,19 @@ async def create_user(new_user: UserBase, session: AsyncSession) -> User:
     await session.refresh(created_user)
     return created_user
 
-
-async def get_user_by_id(user_id: int, session: AsyncSession) -> User:
-    user_by_id = await session.execute(select(User).where(User.id == user_id))
-    user_by_id = user_by_id.scalars().first()
-    return user_by_id
-
-
 async def get_user_by_chat_id(chat_id: int, session: AsyncSession) -> User:
     user_by_id = await session.execute(select(User).where(User.chat_id == chat_id))
     user_by_id = user_by_id.scalars().first()
     return user_by_id
 
-
-async def update_user_by_id(
-    user_id: int, user_in: UserBase, session: AsyncSession
+async def update_user_by_chat_id(
+    user_chat_id: int, user_in: UserBase, session: AsyncSession
 ) -> User:
     updated_user_data = user_in.model_dump(exclude_none=True, exclude_unset=True)
     updated_user = await session.execute(
         update(User)
         .values(**updated_user_data)
-        .where(User.id == user_id)
+        .where(User.id == user_chat_id)
         .returning(User)
     )
     updated_user = updated_user.scalars().first()
@@ -44,5 +36,5 @@ async def update_user_by_id(
     return updated_user
 
 
-async def delete_user_by_id(user_id: int, session: AsyncSession):
-    await session.execute(delete(User).where(User.id == user_id))
+async def delete_user_by_chat_id(user_chat_id: int, session: AsyncSession):
+    await session.execute(delete(User).where(User.chat_id == user_chat_id))
