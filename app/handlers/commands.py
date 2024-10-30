@@ -13,12 +13,13 @@ async def command_start(message: types.Message, session: AsyncSession):
     await message.answer("Hello World!")
 
 
-@router.message(Command("create_user"))
+@router.message(Command("create_user")) # Регистрация юзера????
 async def command_create_user(message: types.Message, session: AsyncSession):
     created_user = await create_user(
         new_user=UserBase(
             name=message.from_user.first_name,
-            chat_id=message.from_user.id
+            chat_id=message.from_user.id,
+            registration_date=message.date
         ),
         session=session
     )

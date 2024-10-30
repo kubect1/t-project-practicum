@@ -1,10 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import JSON
+from typing import Any
 
 from app.core.config import settings
 
-
-Base = declarative_base()
+class Base(DeclarativeBase):
+    type_annotation_map = {
+        dict[Any, Any]: JSON
+    }
 
 engine = create_async_engine(settings.database_url, echo=True)
 
