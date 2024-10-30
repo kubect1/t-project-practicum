@@ -2,14 +2,14 @@ from typing import Optional, Any
 from sqlalchemy import Integer, String, DateTime, JSON, Boolean, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
-from pydantic import Enum
+from enum import Enum
 
 class TransportEnum(Enum):
     subway = 1
     bus = 2
     car = 3
-    train = 3
-    plane = 4
+    train = 4
+    plane = 5
 
 class Trip(Base):
     __tablename__ = "trip"
