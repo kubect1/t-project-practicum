@@ -23,9 +23,7 @@ def upgrade() -> None:
     op.alter_column('user', 'chat_id',
                existing_type=sa.INTEGER(),
                type_=sa.BigInteger(),
-               existing_nullable=False,
-               autoincrement=True,
-               existing_server_default=sa.text("nextval('user_chat_id_seq'::regclass)"))
+               existing_nullable=False)
     # ### end Alembic commands ###
 
 
@@ -34,7 +32,5 @@ def downgrade() -> None:
     op.alter_column('user', 'chat_id',
                existing_type=sa.BigInteger(),
                type_=sa.INTEGER(),
-               existing_nullable=False,
-               autoincrement=True,
-               existing_server_default=sa.text("nextval('user_chat_id_seq'::regclass)"))
+               existing_nullable=False)
     # ### end Alembic commands ###
