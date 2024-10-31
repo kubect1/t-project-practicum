@@ -13,33 +13,35 @@ router = Router(name="commands-router")
 
 @router.message(CommandStart())
 async def command_start(message: Message, session: AsyncSession, state: FSMContext):
+
     user = await get_user_by_chat_id(chat_id=message.from_user.id, session=session)
     if user is None:
         await state.set_state(MainMenu.registration)
-        await message.answer("lets go through the registration")
+        await message.answer("Hello, lets go through the registration")
+        await message.answer("Enter your name")
     else:
         await state.set_state(MainMenu.menu_bar)
         await message.answer(f"Hello {user.name}")
 
 
+
 @router.message(MainMenu.registration)
 async def command_create_user(message: Message, session: AsyncSession, state: FSMContext):
-    await message.answer("Enter your name")
     created_user = await create_user(
         new_user=UserBase(
             name=message.text,
             chat_id=message.from_user.id,
-            registration_date=message.date
+            registration_date=message.date.replace(tzinfo=None)
         ),
         session=session
     )
     if created_user is None:
         await message.answer("It is impossible to create user")
     else:
+        await state.set_state(MainMenu.menu_bar)
         await message.answer(
             f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
         )
-        await state.set_state(MainMenu.menu_bar)
 
 
 @router.message(MainMenu.menu_bar)

@@ -1,5 +1,5 @@
-from typing import Optional, Any
-from sqlalchemy import Integer, String, DateTime, JSON, Boolean, ForeignKey, func
+from typing import Any
+from sqlalchemy import Integer, String, DateTime, JSON, Boolean, ForeignKey, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 from enum import Enum
@@ -15,7 +15,7 @@ class Trip(Base):
     __tablename__ = "trip"
 
     id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True, nullable=False)
-    chat_id: Mapped[int] = mapped_column(Integer(), ForeignKey("user.chat_id"), nullable=False)
+    chat_id: Mapped[int] = mapped_column(BigInteger(), ForeignKey("user.chat_id"), nullable=False)
     to_place: Mapped[dict[Any, Any]] = mapped_column(JSON(), nullable=False)
     from_place: Mapped[dict[Any, Any]] = mapped_column(JSON(), nullable=False)
     to_place_title: Mapped[str] = mapped_column(String(150), nullable=False)

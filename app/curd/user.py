@@ -27,7 +27,7 @@ async def update_user_by_chat_id(
     updated_user = await session.execute(
         update(User)
         .values(**updated_user_data)
-        .where(User.id == user_chat_id)
+        .where(User.chat_id == user_chat_id)
         .returning(User)
     )
     updated_user = updated_user.scalars().first()
