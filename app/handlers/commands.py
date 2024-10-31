@@ -4,9 +4,11 @@ from aiogram.filters import Command, CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
 
+
 from app.curd.user import create_user, update_user_by_chat_id, get_user_by_chat_id
 from app.schemas.user import UserBase
 from app.utils.state import MainMenu
+from app.utils.navigation_states import to_menu_bar
 
 router = Router(name="commands-router")
 
@@ -22,6 +24,7 @@ async def command_start(message: Message, session: AsyncSession, state: FSMConte
     else:
         await state.set_state(MainMenu.menu_bar)
         await message.answer(f"Hello {user.name}")
+        await to_menu_bar(message=message, state=state)
 
 
 
@@ -38,15 +41,15 @@ async def command_create_user(message: Message, session: AsyncSession, state: FS
     if created_user is None:
         await message.answer("It is impossible to create user")
     else:
-        await state.set_state(MainMenu.menu_bar)
         await message.answer(
             f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
         )
+        await to_menu_bar(message=message, state=state)
 
 
 @router.message(MainMenu.menu_bar)
 async def command_choose_action(message: Message, session: AsyncSession, state: FSMContext):
-    await message.answer("Choose an action")
+    pass
 
 
 
