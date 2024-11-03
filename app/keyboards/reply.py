@@ -1,6 +1,7 @@
 from aiogram.types import (
     ReplyKeyboardMarkup,
     KeyboardButton,
+    ReplyKeyboardRemove
 )
 
 main_kb = ReplyKeyboardMarkup(
@@ -14,3 +15,5 @@ main_kb = ReplyKeyboardMarkup(
     one_time_keyboard=True,
     input_field_placeholder='select an action from the menu'
 )
+
+rmk = ReplyKeyboardRemove()

@@ -10,7 +10,7 @@ from app.schemas.user import UserBase
 from app.utils.state import MainMenu
 from app.utils.navigation_states import to_menu_bar, to_registration, to_plan_trip, to_planned_trip_bar
 
-router = Router(name="commands-router")
+router = Router(name="commands_router")
 
 
 @router.message(CommandStart())
@@ -48,7 +48,7 @@ async def command_create_user(message: Message, session: AsyncSession, state: FS
 
 
 @router.message(MainMenu.menu_bar)
-async def command_choose_action(message: Message, session: AsyncSession, state: FSMContext):
+async def command_choose_action(message: Message, state: FSMContext):
     match message.text:
         case 'plan a trip':
             await to_plan_trip(message, state)
