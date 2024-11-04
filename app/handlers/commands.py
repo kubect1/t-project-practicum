@@ -9,6 +9,7 @@ from app.curd.user import create_user, update_user_by_chat_id, get_user_by_chat_
 from app.schemas.user import UserBase
 from app.utils.state import MainMenu
 from app.utils.navigation_states import to_menu_bar, to_registration, to_plan_trip, to_planned_trip_bar
+from app.utils.validation import check_validation_string
 
 router = Router(name="commands_router")
 
@@ -30,21 +31,22 @@ async def command_start(message: Message, session: AsyncSession, state: FSMConte
 
 @router.message(MainMenu.registration)
 async def command_create_user(message: Message, session: AsyncSession, state: FSMContext):
-    created_user = await create_user(
-        new_user=UserBase(
-            name=message.text,
-            chat_id=message.from_user.id,
-            registration_date=message.date.replace(tzinfo=None)
-        ),
-        session=session
-    )
-    if created_user is None:
-        await message.answer("It is impossible to create user")
-    else:
-        await message.answer(
-            f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
+    if await check_validation_string(message.text, message):
+        created_user = await create_user(
+            new_user=UserBase(
+                name=message.text,
+                chat_id=message.from_user.id,
+                registration_date=message.date.replace(tzinfo=None)
+            ),
+            session=session
         )
-        await to_menu_bar(message, state)
+        if created_user is None:
+            await message.answer("It is impossible to create user")
+        else:
+            await message.answer(
+                f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
+            )
+            await to_menu_bar(message, state)
 
 
 @router.message(MainMenu.menu_bar)
