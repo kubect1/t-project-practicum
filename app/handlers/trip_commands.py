@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
-
+import datetime as dt
 
 
 from app.keyboards.builders import reply_builder
@@ -77,6 +77,9 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
         if created_trip is None:
             await message.answer("It is impossible to create trip")
         else:
+            # change data for to show the user
+            trip_data['transport_type'] = trip_data['transport_type'].name
+            trip_data['notification_before_travel'] = trip_data['notification_before_travel'] - dt.datetime.fromisoformat('1970-01-01')
             text = '\n'.join([f'{key}: {value}' for key, value in trip_data.items()])
             await message.answer(text)
             await message.answer("The trip was saved")
