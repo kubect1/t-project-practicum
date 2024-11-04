@@ -6,7 +6,8 @@ import datetime as dt
 
 
 from app.keyboards.builders import reply_builder
-from app.keyboards.reply import rmk
+from app.keyboards.reply import rmk, selection_notification_time
+
 
 from app.curd.trip import create_trip, get_trip_by_id, update_trip_by_id
 from app.schemas.trip import TransportEnum, TripBase
@@ -42,7 +43,7 @@ async def command_take_travel_date(message: Message, state: FSMContext):
         await state.update_data(travel_date=datetime)
         await state.set_state(PlanTrip.notification_before_travel)
         await message.answer('Enter the time for notification if format: "days hours minutes seconds", '
-                             'without quotation marks where you write numbers instead of words', reply_markup=rmk)
+                             'without quotation marks where you write numbers instead of words', reply_markup=selection_notification_time)
 
 
 @router.message(PlanTrip.notification_before_travel)

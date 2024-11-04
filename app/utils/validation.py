@@ -32,10 +32,20 @@ async def check_validation_travel_datetime(date_time: str, message: Message) -> 
     return datetime.fromisoformat(date + 'T' + time)
 
 async def check_validation_notification_time(time: str, message: Message) -> dt.datetime | None:
-    for value in time.split():
-        if not value.isdigit():
-            await message.answer("Incorrect format")
-    days, hours, minutes, seconds = [int(value) for value in time.split()]
+    days = hours = minutes = seconds = 0
+    match time:
+        case '10 minutes':
+            minutes = 10
+        case '20 minutes':
+            minutes = 20
+        case '30 minutes':
+            minutes = 30
+        case _:
+            for value in time.split():
+                if not value.isdigit():
+                    await message.answer("Incorrect format")
+                    return
+            days, hours, minutes, seconds = [int(value) for value in time.split()]
     timedelta_value = dt.timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
     if not (dt.timedelta(seconds=1) <= timedelta_value <= dt.timedelta(days=365)):
         await message.answer("The notification time can be from 1 second to 1 year")
