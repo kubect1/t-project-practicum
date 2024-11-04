@@ -5,7 +5,7 @@ from app.schemas.trip import TransportEnum
 
 async def check_validation_string(string: str, message: Message) -> bool:
     correct_date = True
-    if not string.isalpha():
+    if any(not word.isalpha() for word in string.split()):
         correct_date = False
         await message.answer("The string must contain only Cyrillic and Latin characters")
 
