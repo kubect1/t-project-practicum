@@ -14,8 +14,8 @@ async def create_trip(new_trip: TripBase, session: AsyncSession) -> Trip:
     await session.refresh(created_trip)
     return created_trip
 
-async def get_trip_by_id(new_trip: TripBase, session: AsyncSession) -> Trip:
-    trip_by_id = await session.execute(select(Trip).where(Trip.id == id))
+async def get_trip_by_id(trip_id: int, session: AsyncSession) -> Trip:
+    trip_by_id = await session.execute(select(Trip).where(Trip.id == trip_id))
     trip_by_id = trip_by_id.scalars().first()
     return trip_by_id
 
@@ -39,4 +39,4 @@ async def update_trip_by_id(trip_id: int, trip_in: TripBase, session: AsyncSessi
 
 
 async def delete_trip_by_id(trip_id: int, session: AsyncSession):
-    await session.execute(delete(Trip).where(Trip.trip_id == trip_id))
+    await session.execute(delete(Trip).where(Trip.id == trip_id))

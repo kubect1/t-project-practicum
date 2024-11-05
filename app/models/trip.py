@@ -1,5 +1,5 @@
 from typing import Any
-from sqlalchemy import Integer, String, DateTime, JSON, Boolean, ForeignKey, BigInteger
+from sqlalchemy import Integer, String, DateTime, JSON, Boolean, ForeignKey, BigInteger, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 from enum import Enum
@@ -23,5 +23,5 @@ class Trip(Base):
     transport_type: Mapped[TransportEnum] = mapped_column(String(150), nullable=False)
     create_date: Mapped[DateTime] = mapped_column(DateTime(), nullable=False)
     travel_date: Mapped[DateTime] = mapped_column(DateTime(), nullable=False)
-    notification_before_travel: Mapped[DateTime] = mapped_column(DateTime(), nullable=False)
+    notification_before_travel: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP(), nullable=False)
     isEnded: Mapped[bool] = mapped_column(Boolean(), nullable=False)

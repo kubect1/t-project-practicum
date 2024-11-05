@@ -6,8 +6,3 @@ class UserBase(BaseModel):
     name: str = Field(..., min_length=3, max_length=128)
     registration_date: datetime = Field(...)
 
-class UserRead(UserBase):
-    id: int
-
-    class Config:
-        from_attributes = True

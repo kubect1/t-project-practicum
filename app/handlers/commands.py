@@ -8,9 +8,11 @@ from aiogram.fsm.context import FSMContext
 from app.curd.user import create_user, update_user_by_chat_id, get_user_by_chat_id
 from app.schemas.user import UserBase
 from app.utils.state import MainMenu
+from app.utils.navigation_states import to_menu_bar, to_registration, to_plan_trip, to_planned_trip_bar
+from app.utils.validation import check_validation_string
 from app.utils.navigation_states import to_menu_bar, to_planned_trip_bar
 
-router = Router(name="commands-router")
+router = Router(name="commands_router")
 
 
 @router.message(CommandStart())
@@ -18,45 +20,45 @@ async def command_start(message: Message, session: AsyncSession, state: FSMConte
 
     user = await get_user_by_chat_id(chat_id=message.from_user.id, session=session)
     if user is None:
-        await state.set_state(MainMenu.registration)
         await message.answer("Hello, lets go through the registration")
-        await message.answer("Enter your name")
+        await to_registration(message, state)
+
     else:
         await state.set_state(MainMenu.menu_bar)
-        await message.answer(f"Hello {user.name}")
-        await to_menu_bar(message=message, state=state)
+        await message.answer(f"Hello, {user.name}")
+        await to_menu_bar(message, state)
 
 
 
 @router.message(MainMenu.registration)
 async def command_create_user(message: Message, session: AsyncSession, state: FSMContext):
-    created_user = await create_user(
-        new_user=UserBase(
-            name=message.text,
-            chat_id=message.from_user.id,
-            registration_date=message.date.replace(tzinfo=None)
-        ),
-        session=session
-    )
-    if created_user is None:
-        await message.answer("It is impossible to create user")
-    else:
-        await message.answer(
-            f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
+    if await check_validation_string(message.text, message):
+        created_user = await create_user(
+            new_user=UserBase(
+                name=message.text,
+                chat_id=message.from_user.id,
+                registration_date=message.date.replace(tzinfo=None)
+            ),
+            session=session
         )
-        await to_menu_bar(message=message, state=state)
+        if created_user is None:
+            await message.answer("It is impossible to create user")
+        else:
+            await message.answer(
+                f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
+            )
+            await to_menu_bar(message, state)
 
 
 @router.message(MainMenu.menu_bar)
-async def command_choose_action(message: Message, session: AsyncSession, state: FSMContext):
+async def command_choose_action(message: Message, state: FSMContext):
     match message.text:
         case 'plan a trip':
             await to_plan_trip(message, state)
         case 'display all planned trips':
-            await to_planned_trip_bar(message, session, state)
+            await to_planned_trip_bar(message, state)
         case _:
             await message.answer('Press the button')
-
 
 
 # @router.message(F.text.startswith("Change user:"))
