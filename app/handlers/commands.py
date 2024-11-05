@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from app.curd.user import create_user, update_user_by_chat_id, get_user_by_chat_id
 from app.schemas.user import UserBase
 from app.utils.state import MainMenu
-from app.utils.navigation_states import to_menu_bar
+from app.utils.navigation_states import to_menu_bar, to_planned_trip_bar
 
 router = Router(name="commands-router")
 
@@ -49,7 +49,13 @@ async def command_create_user(message: Message, session: AsyncSession, state: FS
 
 @router.message(MainMenu.menu_bar)
 async def command_choose_action(message: Message, session: AsyncSession, state: FSMContext):
-    pass
+    match message.text:
+        case 'plan a trip':
+            await to_plan_trip(message, state)
+        case 'display all planned trips':
+            await to_planned_trip_bar(message, session, state)
+        case _:
+            await message.answer('Press the button')
 
 
 
