@@ -19,7 +19,7 @@ async def get_trip_by_id(trip_id: int, session: AsyncSession) -> Trip:
     trip_by_id = trip_by_id.scalars().first()
     return trip_by_id
 
-async def get_trips_by_chatid(chat_id: int, session: AsyncSession):
+async def get_trips_by_chat_id(chat_id: int, session: AsyncSession):
     trip_array = await session.execute(select(Trip).where(Trip.chat_id == chat_id))
     trip_array = trip_array.all()
     return trip_array

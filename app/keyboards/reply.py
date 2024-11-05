@@ -30,3 +30,17 @@ selection_notification_time = ReplyKeyboardMarkup(
     one_time_keyboard=True,
     input_field_placeholder="select a notification time"
 )
+
+trip_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Change trip'),
+            KeyboardButton(text='Delete trip'),
+            KeyboardButton(text='Mark as travelled'),
+            KeyboardButton(text='Return')
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+    input_field_placeholder='select an action from the menu'
+)
