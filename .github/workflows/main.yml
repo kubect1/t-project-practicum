@@ -11,6 +11,7 @@ on:
 
 jobs:
   quality:
+    name: linters
 
     runs-on: ubuntu-latest
 
