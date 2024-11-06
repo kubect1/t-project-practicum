@@ -8,7 +8,7 @@ from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
 from app.curd.trip import create_trip, update_trip_by_id, delete_trip_by_id
-from app.schemas.trip import TransportEnum, TripBase
+from app.schemas.trip import TransportEnum, TripBase, TripRead
 
 from app.utils.state import PlanTrip, TripMenu, MainMenu
 from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar, \
@@ -126,7 +126,6 @@ async def command_delete_trip(message: Message, session: AsyncSession, state: FS
             trip = state_data['trip']
             trip = TripRead.model_validate(trip)
             id = trip.id
-            await message.answer(str(trip.id))
             await delete_trip_by_id(id, session)
             await message.answer("Trip deleted successfully")
             await to_planned_trip_bar(message, session, state)
