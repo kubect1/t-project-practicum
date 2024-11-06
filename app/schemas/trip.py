@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 from enum import Enum
 
 
@@ -23,8 +23,13 @@ class TripBase(BaseModel):
     notification_before_travel: datetime = Field(...)
     isEnded: bool = Field(...)
 
-    class Config:
-        from_attributes = True
+    def __str__(self):
+        return self.from_place_title + '  -->  ' + self.to_place_title + ' : ' + f'At {self.travel_date}'
+
+    def get_info(self):
+        return (str(self) + '\n' +
+                f'time for notification before travel: {self.notification_before_travel - datetime.fromisoformat('1970-01-01')}' + '\n' +
+                f'type of transport: {self.transport_type.name}')
 
 
 class TripRead(TripBase):
@@ -34,4 +39,4 @@ class TripRead(TripBase):
         from_attributes = True
 
 
-    
+

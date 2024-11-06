@@ -10,6 +10,7 @@ from app.schemas.user import UserBase
 from app.utils.state import MainMenu
 from app.utils.navigation_states import to_menu_bar, to_registration, to_plan_trip, to_planned_trip_bar
 from app.utils.validation import check_validation_string
+from app.utils.navigation_states import to_menu_bar, to_planned_trip_bar
 
 router = Router(name="commands_router")
 
@@ -24,7 +25,7 @@ async def command_start(message: Message, session: AsyncSession, state: FSMConte
 
     else:
         await state.set_state(MainMenu.menu_bar)
-        await message.answer(f"Hello, {user.name}")
+        await message.answer(f"Hello, {user.name}!")
         await to_menu_bar(message, state)
 
 
@@ -44,18 +45,18 @@ async def command_create_user(message: Message, session: AsyncSession, state: FS
             await message.answer("It is impossible to create user")
         else:
             await message.answer(
-                f"Hello {created_user.name} from {created_user.chat_id}! Now you are in my local database!"
+                f"Hello, {created_user.name}!"
             )
             await to_menu_bar(message, state)
 
 
 @router.message(MainMenu.menu_bar)
-async def command_choose_action(message: Message, state: FSMContext):
+async def command_choose_action(message: Message, session: AsyncSession, state: FSMContext):
     match message.text:
         case 'plan a trip':
             await to_plan_trip(message, state)
         case 'display all planned trips':
-            await to_planned_trip_bar(message, state)
+            await to_planned_trip_bar(message, session, state)
         case _:
             await message.answer('Press the button')
 

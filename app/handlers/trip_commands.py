@@ -4,18 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
 import datetime as dt
 
-
 from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
-
-from app.curd.trip import create_trip, get_trip_by_id, update_trip_by_id
+from app.curd.trip import create_trip, get_trip_by_id, update_trip_by_id, get_trips_by_chat_id
 from app.schemas.trip import TransportEnum, TripBase
 
-from app.utils.state import PlanTrip
-from app.utils.navigation_states import to_menu_bar
+from app.utils.state import PlanTrip, TripMenu, MainMenu
+from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar
 from app.utils.validation import check_validation_string, check_validation_travel_datetime, \
-    check_validation_notification_time, check_validation_transport_type
+    check_validation_notification_time, check_validation_transport_type, check_validation_number_of_trip
+
 
 router = Router(name="trip_commands_router")
 
@@ -42,7 +41,7 @@ async def command_take_travel_date(message: Message, state: FSMContext):
     if datetime:
         await state.update_data(travel_date=datetime)
         await state.set_state(PlanTrip.notification_before_travel)
-        await message.answer('Enter the time for notification if format: "days hours minutes seconds", '
+        await message.answer('Enter the time for notification before travel if format: "days hours minutes seconds", '
                              'without quotation marks where you write numbers instead of words', reply_markup=selection_notification_time)
 
 
@@ -88,4 +87,42 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
 
 
 
+@router.message(MainMenu.planned_trips_bar)
+async def command_choose_trip(message: Message, session: AsyncSession, state: FSMContext):
+    state_data = await state.get_data()
+    trips = state_data['trips']
+    match message.text:
+        case 'Return':
+            await to_menu_bar(message, state)
+        case _:
+            if await check_validation_number_of_trip(len(trips), message.text, message):
+                selected_trip = trips[int(message.text) - 1]
+                await message.answer(selected_trip.get_info())
+                await state.update_data(trip=selected_trip)
+                await to_selected_trip_bar(message, state)
+
+
+@router.message(TripMenu.selected_trip_bar)
+async def command_choose_action_with_trip(message: Message, session: AsyncSession, state: FSMContext):
+    match message.text:
+        case 'Change trip':
+            await to_modify_trip(message, state)
+        case 'Delete trip':
+            await to_delete_trip(message, state)
+        case 'Mark as travelled':
+            await to_mark_traveled(message, state)
+        case 'Return':
+            await to_menu_bar(message, state)
+
+@router.message(TripMenu.modify_trip)
+async def command_modify_trip(message: Message, session: AsyncSession, state: FSMContext):
+    pass
+
+@router.message(TripMenu.delete_trip)
+async def command_delete_trip(message: Message, session: AsyncSession, state: FSMContext):
+    pass
+
+@router.message(TripMenu.mark_traveled)
+async def command_mark_travelled(message: Message, session: AsyncSession, state: FSMContext):
+    pass
 

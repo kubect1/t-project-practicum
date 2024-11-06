@@ -15,7 +15,6 @@ async def check_validation_string(string: str, message: Message) -> bool:
 
     return correct_date
 
-
 async def check_validation_travel_datetime(date_time: str, message: Message) -> dt.datetime | None:
     try:
         date, time = date_time.split()
@@ -52,7 +51,7 @@ async def check_validation_notification_time(time: str, message: Message) -> dt.
         return
     return dt.datetime.fromisoformat('1970-01-01') + timedelta_value
 
-async def check_validation_transport_type(transport_type: str, message: Message):
+async def check_validation_transport_type(transport_type: str, message: Message) -> bool:
     correct_data = False
     for tr_type in list(TransportEnum):
         if TransportEnum(tr_type).name == transport_type:
@@ -63,6 +62,17 @@ async def check_validation_transport_type(transport_type: str, message: Message)
     return correct_data
 
 
+async def check_validation_number_of_trip(len_trips: int, number: str, message: Message) -> bool:
+    if not number.isdigit():
+        await message.answer('Enter a number')
+        return False
+    if int(number) < 1:
+        await message.answer(f'Number must be positive')
+        return False
+    if int(number) > len_trips:
+        await message.answer(f'Enter number up to {len_trips}')
+        return False
+    return True
 
 
 
