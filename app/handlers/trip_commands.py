@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
@@ -7,7 +7,7 @@ import datetime as dt
 from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
-from app.curd.trip import create_trip, get_trip_by_id, update_trip_by_id, get_trips_by_chat_id
+from app.curd.trip import create_trip
 from app.schemas.trip import TransportEnum, TripBase
 
 from app.utils.state import PlanTrip, TripMenu, MainMenu
