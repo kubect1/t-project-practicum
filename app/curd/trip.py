@@ -40,3 +40,4 @@ async def update_trip_by_id(trip_id: int, trip_in: TripBase, session: AsyncSessi
 
 async def delete_trip_by_id(trip_id: int, session: AsyncSession):
     await session.execute(delete(Trip).where(Trip.id == trip_id))
+    await session.commit()

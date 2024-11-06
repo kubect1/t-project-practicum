@@ -2,8 +2,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.schemas.trip import TripRead
-from app.utils.state import MainMenu, PlanTrip, TripMenu
-from app.keyboards.reply import main_kb, rmk, trip_kb
+from app.utils.state import MainMenu, PlanTrip, TripMenu, State
+from app.keyboards.reply import main_kb, rmk, trip_kb, confirm_kb
 from app.keyboards.builders import reply_builder
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,6 +52,8 @@ async def to_modify_trip(message: Message, state: FSMContext):
 
 async def to_delete_trip(message: Message, state: FSMContext):
     await state.set_state(TripMenu.delete_trip)
+    await message.answer("Confirm action?", reply_markup=confirm_kb)
 
 async def to_mark_traveled(message: Message, state: FSMContext):
     await state.set_state(TripMenu.mark_traveled)
+    await message.answer("Confirm action?", reply_markup=confirm_kb)
