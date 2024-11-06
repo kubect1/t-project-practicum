@@ -12,6 +12,7 @@ on:
 
 jobs:
   quality:
+    name: lint
 
     runs-on: ubuntu-latest
 
