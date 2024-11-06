@@ -6,7 +6,7 @@ from app.utils.state import MainMenu, PlanTrip, TripMenu
 from app.keyboards.reply import main_kb, rmk, trip_kb
 from app.keyboards.builders import reply_builder
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.trip import Trip
+
 
 from app.curd.trip import get_trips_by_chat_id
 
@@ -29,8 +29,8 @@ async def to_plan_trip(message: Message, state: FSMContext):
 
 
 async def to_planned_trip_bar(message: Message, session: AsyncSession, state: FSMContext):
-    trips: list[Trip] = await get_trips_by_chat_id(message.from_user.id, session)
-    #trips: list[TripRead] = [TripRead.model_validate(trip) for trip in trips]
+    trips = await get_trips_by_chat_id(message.from_user.id, session)
+    trips = [TripRead.model_validate(trip) for trip in trips]
     await state.update_data(trips=trips)
     if len(trips):
         trips_to_print = str('\n' + 10*'-' + '\n').join([f"{i + 1}: " + str(trips[i]) for i in range(len(trips))])

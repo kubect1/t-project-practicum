@@ -26,6 +26,11 @@ class TripBase(BaseModel):
     def __str__(self):
         return self.from_place_title + '  -->  ' + self.to_place_title + ' : ' + f'At {self.travel_date}'
 
+    def get_info(self):
+        return (str(self) + '\n' +
+                f'time for notification before travel: {self.notification_before_travel - datetime.fromisoformat('1970-01-01')}' + '\n' +
+                f'type of transport: {self.transport_type.name}')
+
 
 class TripRead(TripBase):
     id: int = Field(...)

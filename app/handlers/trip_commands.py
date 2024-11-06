@@ -41,7 +41,7 @@ async def command_take_travel_date(message: Message, state: FSMContext):
     if datetime:
         await state.update_data(travel_date=datetime)
         await state.set_state(PlanTrip.notification_before_travel)
-        await message.answer('Enter the time for notification if format: "days hours minutes seconds", '
+        await message.answer('Enter the time for notification before travel if format: "days hours minutes seconds", '
                              'without quotation marks where you write numbers instead of words', reply_markup=selection_notification_time)
 
 
@@ -97,7 +97,7 @@ async def command_choose_trip(message: Message, session: AsyncSession, state: FS
         case _:
             if await check_validation_number_of_trip(len(trips), message.text, message):
                 selected_trip = trips[int(message.text) - 1]
-                await message.answer(str(selected_trip))
+                await message.answer(selected_trip.get_info())
                 await state.update_data(trip=selected_trip)
                 await to_selected_trip_bar(message, state)
 

@@ -66,6 +66,9 @@ async def check_validation_number_of_trip(len_trips: int, number: str, message: 
     if not number.isdigit():
         await message.answer('Enter a number')
         return False
+    if int(number) < 1:
+        await message.answer(f'Number must be positive')
+        return False
     if int(number) > len_trips:
         await message.answer(f'Enter number up to {len_trips}')
         return False
