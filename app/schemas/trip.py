@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Any, Self
+from typing import Any
 from enum import Enum
 
 
@@ -24,11 +24,8 @@ class TripBase(BaseModel):
     isEnded: bool = Field(...)
 
     def __str__(self):
-        isEnded_str = ''
-        if (self.isEnded):
-            isEnded_str = " <=> Completed ✅"
         return (self.from_place_title + '  -->  ' + self.to_place_title + ' : ' +
-                f'At {self.travel_date}' + isEnded_str)
+                f'At {self.travel_date}\nCompleted: {'Yes' if self.isEnded else 'No'}')
 
     def get_info(self):
         return (str(self) + '\n' +

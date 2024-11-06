@@ -13,6 +13,7 @@ from app.curd.trip import get_trips_by_chat_id
 
 
 async def to_menu_bar(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(MainMenu.menu_bar)
     await message.answer("Choose an action", reply_markup=main_kb)
 
