@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
@@ -7,7 +7,7 @@ import datetime as dt
 from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
-from app.curd.trip import create_trip, get_trip_by_id, update_trip_by_id, get_trips_by_chat_id
+from app.curd.trip import create_trip
 from app.schemas.trip import TransportEnum, TripBase
 
 from app.utils.state import PlanTrip, TripMenu, MainMenu
@@ -62,7 +62,6 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
     if await check_validation_transport_type(message.text, message):
         await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
         trip_data = await state.get_data()
-        await state.clear()
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,

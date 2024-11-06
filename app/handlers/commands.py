@@ -1,14 +1,14 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.types import Message
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.fsm.context import FSMContext
 
 
-from app.curd.user import create_user, update_user_by_chat_id, get_user_by_chat_id
+from app.curd.user import create_user, get_user_by_chat_id
 from app.schemas.user import UserBase
 from app.utils.state import MainMenu
-from app.utils.navigation_states import to_menu_bar, to_registration, to_plan_trip, to_planned_trip_bar
+from app.utils.navigation_states import to_registration, to_plan_trip
 from app.utils.validation import check_validation_string
 from app.utils.navigation_states import to_menu_bar, to_planned_trip_bar
 
