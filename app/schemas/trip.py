@@ -24,7 +24,8 @@ class TripBase(BaseModel):
     isEnded: bool = Field(...)
 
     def __str__(self):
-        return self.from_place_title + '  -->  ' + self.to_place_title + ' : ' + f'At {self.travel_date}'
+        return (self.from_place_title + '  -->  ' + self.to_place_title + ' : ' +
+                f'At {self.travel_date}\nCompleted: {'Yes' if self.isEnded else 'No'}')
 
     def get_info(self):
         return (str(self) + '\n' +
