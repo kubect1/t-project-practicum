@@ -2,7 +2,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.schemas.trip import TripRead
-from app.utils.state import MainMenu, PlanTrip, TripMenu, State
+from app.utils.state import MainMenu, PlanTrip, TripMenu
 from app.keyboards.reply import main_kb, rmk, trip_kb, confirm_kb
 from app.keyboards.builders import reply_builder
 from sqlalchemy.ext.asyncio import AsyncSession
