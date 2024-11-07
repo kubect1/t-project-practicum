@@ -44,3 +44,15 @@ trip_kb = ReplyKeyboardMarkup(
     one_time_keyboard=True,
     input_field_placeholder='select an action from the menu'
 )
+
+confirm_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Yes'),
+            KeyboardButton(text='No'),
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+    input_field_placeholder='Confirm or reject'
+)

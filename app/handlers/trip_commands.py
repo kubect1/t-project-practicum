@@ -7,11 +7,12 @@ import datetime as dt
 from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
-from app.curd.trip import create_trip
-from app.schemas.trip import TransportEnum, TripBase
+from app.curd.trip import create_trip, update_trip_by_id, delete_trip_by_id
+from app.schemas.trip import TransportEnum, TripBase, TripRead
 
 from app.utils.state import PlanTrip, TripMenu, MainMenu
-from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar
+from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar, \
+    to_planned_trip_bar
 from app.utils.validation import check_validation_string, check_validation_travel_datetime, \
     check_validation_notification_time, check_validation_transport_type, check_validation_number_of_trip
 
@@ -119,9 +120,37 @@ async def command_modify_trip(message: Message, session: AsyncSession, state: FS
 
 @router.message(TripMenu.delete_trip)
 async def command_delete_trip(message: Message, session: AsyncSession, state: FSMContext):
-    pass
+    match message.text:
+        case 'Yes':
+            state_data = await state.get_data()
+            trip = state_data['trip']
+            trip = TripRead.model_validate(trip)
+            id = trip.id
+            await delete_trip_by_id(id, session)
+            await message.answer("Trip deleted successfully")
+            await to_planned_trip_bar(message, session, state)
+        case 'No':
+            await message.answer("Deletion canceled")
+            await to_selected_trip_bar(message, state)
 
 @router.message(TripMenu.mark_traveled)
 async def command_mark_travelled(message: Message, session: AsyncSession, state: FSMContext):
-    pass
+    match message.text:
+        case 'Yes':
+            state_data = await state.get_data()
+            trip = state_data['trip']
+            trip = TripRead.model_validate(trip)
+            if (trip.isEnded):
+                trip.isEnded = False
+                await update_trip_by_id(trip.id, trip, session)
+                await message.answer("Trip unmarked as traveled")
+                await to_planned_trip_bar(message, session, state)
+            else:
+                trip.isEnded = True
+                await update_trip_by_id(trip.id, trip, session)
+                await message.answer("Trip marked as traveled")
+                await to_planned_trip_bar(message, session, state)
+        case 'No':
+            await message.answer("Marking canceled")
+            await to_selected_trip_bar(message, state)
 
