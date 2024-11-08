@@ -6,6 +6,7 @@ from app.schemas.trip import TripBase
 
 async def create_trip(new_trip: TripBase, session: AsyncSession) -> Trip:
     created_trip_data = new_trip.model_dump(exclude_none=True, exclude_unset=True)
+    created_trip_data['transport_type'] = created_trip_data['transport_type'].value
     created_trip = await session.execute(
         insert(Trip).values(**created_trip_data).returning(Trip)
     )

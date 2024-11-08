@@ -8,7 +8,7 @@ from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
 from app.curd.trip import create_trip, update_trip_by_id, delete_trip_by_id
-from app.schemas.trip import TransportEnum, TripBase, TripRead
+from app.schemas.trip import TransportEnum, TripBase, TripRead, Coordinates
 
 from app.utils.state import PlanTrip, TripMenu, MainMenu
 from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar, \
@@ -66,8 +66,8 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,
-                to_place={},
-                from_place={},
+                to_place=Coordinates(latitude='', longitude=''),
+                from_place=Coordinates(latitude='', longitude=''),
                 create_date=message.date.replace(tzinfo=None),
                 isEnded=False,
                 **trip_data
