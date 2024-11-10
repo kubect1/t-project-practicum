@@ -56,3 +56,23 @@ confirm_kb = ReplyKeyboardMarkup(
     one_time_keyboard=True,
     input_field_placeholder='Confirm or reject'
 )
+
+selection_field_for_change = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='from place title'),
+            KeyboardButton(text='to place title')
+        ],
+        [
+            KeyboardButton(text='travel date'),
+            KeyboardButton(text='notification before travel'),
+        ],
+        [
+            KeyboardButton(text='transport type'),
+            KeyboardButton(text='Return')
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+    input_field_placeholder='select what you want to change'
+)
