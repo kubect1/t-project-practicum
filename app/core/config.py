@@ -7,6 +7,7 @@ load_dotenv()
 class Settings(BaseSettings):
     database_url: str
     telegram_bot_token: str
+    redis_url: str
 
     class Config:
         env_file = ".env"
