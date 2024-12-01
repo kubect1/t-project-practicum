@@ -1,6 +1,6 @@
 from aiogram.types import Message
 import datetime as dt
-from app.schemas.trip import TransportEnum
+from app.schemas.trip import TransportEnum, Coordinates
 
 
 async def check_validation_string(string: str, message: Message) -> bool:
@@ -73,6 +73,15 @@ async def check_validation_number_of_trip(len_trips: int, number: str, message: 
         await message.answer(f'Enter number up to {len_trips}')
         return False
     return True
+
+async def check_validation_location(message: Message) -> Coordinates | None:
+    try:
+        location = Coordinates(latitude=str(message.location.latitude),
+                               longitude=str(message.location.longitude))
+        return location
+    except ValueError:
+        await message.answer('Send the location')
+        return
 
 
 

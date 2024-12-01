@@ -8,7 +8,9 @@ class MainMenu(StatesGroup):
 
 class PlanTrip(StatesGroup):
     from_place_title = State()
+    from_place = State()
     to_place_title = State()
+    to_place = State()
     travel_date = State()
     notification_before_travel = State()
     transport_type = State()
@@ -20,6 +22,7 @@ class ChangeTrip(StatesGroup):
     travel_date = State()
     notification_before_travel = State()
     transport_type = State()
+    location = State()
 
 
 class TripMenu(StatesGroup):

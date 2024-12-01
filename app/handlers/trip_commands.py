@@ -8,84 +8,20 @@ import datetime as dt
 from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 
-from app.curd.trip import create_trip, update_trip_by_id, delete_trip_by_id
-from app.schemas.trip import TransportEnum, TripBase, TripRead, Coordinates
+from app.curd.trip import update_trip_by_id, delete_trip_by_id
+from app.schemas.trip import TransportEnum, TripRead
 from app.utils.notifiaction import check_need_to_create_task_immediately, cancel_notification
 
-from app.utils.state import PlanTrip, TripMenu, MainMenu, ChangeTrip
-from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, to_selected_trip_bar, \
-    to_planned_trip_bar
+from app.utils.state import TripMenu, MainMenu, ChangeTrip
+from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, \
+    to_selected_trip_bar, \
+    to_planned_trip_bar, to_change_location
 from app.utils.validation import check_validation_string, check_validation_travel_datetime, \
-    check_validation_notification_time, check_validation_transport_type, check_validation_number_of_trip
+    check_validation_transport_type, check_validation_number_of_trip, check_validation_location
 
 from celery_queue.tasks import get_last_check_notification_time, right_border
 
 router = Router(name="trip_commands_router")
-
-
-@router.message(PlanTrip.from_place_title)
-async def command_take_from_place_title(message: Message, state: FSMContext):
-    if await check_validation_string(message.text, message):
-        await state.update_data(from_place_title=message.text)
-        await state.set_state(PlanTrip.to_place_title)
-        await message.answer("Enter end of trip place", reply_markup=rmk)
-
-
-@router.message(PlanTrip.to_place_title)
-async def command_take_to_place_title(message: Message, state: FSMContext):
-    if await check_validation_string(message.text, message):
-        await state.update_data(to_place_title=message.text)
-        await state.set_state(PlanTrip.travel_date)
-        await message.answer('Enter travel date and time in format: "YYYY-MM-DD HH:MM:SS", without quotation marks', reply_markup=rmk)
-
-
-@router.message(PlanTrip.travel_date)
-async def command_take_travel_date(message: Message, state: FSMContext):
-    datetime = await check_validation_travel_datetime(message.text, message)
-    if datetime:
-        await state.update_data(travel_date=datetime)
-        await state.set_state(PlanTrip.notification_before_travel)
-        await message.answer('Enter the time for notification before travel if format: "days hours minutes seconds", '
-                             'without quotation marks where you write numbers instead of words', reply_markup=selection_notification_time)
-
-
-@router.message(PlanTrip.notification_before_travel)
-async def command_take_notification_before_travel(message: Message, state: FSMContext):
-    datetime = await check_validation_notification_time(message.text, message)
-    if datetime:
-        await state.update_data(notification_before_travel=datetime)
-        await state.set_state(PlanTrip.transport_type)
-        await message.answer(
-            "Choose type of transport",
-                 reply_markup=reply_builder([TransportEnum(transport_type).name for transport_type in list(TransportEnum)])
-                )
-
-
-@router.message(PlanTrip.transport_type)
-async def command_take_transport_type(message: Message, session: AsyncSession, state: FSMContext):
-    if await check_validation_transport_type(message.text, message):
-        await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
-        trip_data = await state.get_data()
-        created_trip = await create_trip(
-            new_trip=TripBase(
-                chat_id =message.from_user.id,
-                to_place=Coordinates(latitude='', longitude=''),
-                from_place=Coordinates(latitude='', longitude=''),
-                create_date=message.date.replace(tzinfo=None),
-                isEnded=False,
-                **trip_data
-            ),
-            session=session
-        )
-        if created_trip is None:
-            await message.answer("It is impossible to create trip")
-        else:
-            created_trip = TripRead.model_validate(created_trip)
-            check_need_to_create_task_immediately(created_trip)
-            await message.answer(created_trip.get_info())
-            await message.answer("The trip was saved")
-        await to_menu_bar(message, state)
-
 
 
 @router.message(MainMenu.planned_trips_bar)
@@ -207,21 +143,44 @@ async def save_change_trip(trip: TripRead, message: Message, session: AsyncSessi
     await to_menu_bar(message, state)
 
 @router.message(ChangeTrip.from_place_title)
-async def command_change_from_place_title(message: Message, session: AsyncSession, state: FSMContext):
+async def command_change_from_place_title(message: Message, state: FSMContext):
     if await check_validation_string(message.text, message):
         state_data = await state.get_data()
         trip = state_data['trip']
         trip.from_place_title = message.text
-        await save_change_trip(trip,message, session, state)
+        await state.update_data(trip=trip)
+        await state.update_data(type_place='from')
+        await to_change_location(message, state)
 
 
 @router.message(ChangeTrip.to_place_title)
-async def command_change_to_place_title(message: Message, session: AsyncSession, state: FSMContext):
+async def command_change_to_place_title(message: Message, state: FSMContext):
     if await check_validation_string(message.text, message):
         state_data = await state.get_data()
         trip = state_data['trip']
         trip.to_place_title = message.text
+        await state.update_data(trip=trip)
+        await state.update_data(type_place='to')
+        await state.set_state(ChangeTrip.location)
+        await message.answer('Send the location of the place with an attachment', reply_markup=rmk)
+
+
+@router.message(ChangeTrip.location)
+async def command_change_location(message: Message, session: AsyncSession, state: FSMContext):
+    location = await check_validation_location(message)
+    if location:
+        state_data = await state.get_data()
+        trip = state_data['trip']
+        type_place = state_data['type_place']
+        match type_place:
+            case 'to':
+                trip.to_place = location
+            case 'from':
+                trip.from_place = location
         await save_change_trip(trip, message, session, state)
+
+
+
 
 
 @router.message(ChangeTrip.travel_date)

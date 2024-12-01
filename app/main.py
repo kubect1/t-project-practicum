@@ -7,6 +7,7 @@ from app.core.db import AsyncSessionLocal
 from app.middlewares.db_session_middleware import DBSessionMiddleware
 from app.handlers.commands import router as commands_router
 from app.handlers.trip_commands import router as trip_commands_router
+from app.handlers.plan_trip_commands import router as plan_trip_commands_router
 
 
 async def main():
@@ -14,7 +15,7 @@ async def main():
     dp = Dispatcher()
 
     dp.update.middleware(DBSessionMiddleware(session_pool=AsyncSessionLocal))
-    dp.include_routers(commands_router, trip_commands_router)
+    dp.include_routers(commands_router, trip_commands_router, plan_trip_commands_router)
 
     await dp.start_polling(bot)
 
