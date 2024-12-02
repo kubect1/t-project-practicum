@@ -8,6 +8,7 @@ from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 from app.models.transport_enum import TransportEnum
 from app.schemas.trip import TripBase, TripRead
+from app.utils.get_timezone import get_timezone
 from app.utils.navigation_states import to_menu_bar
 from app.utils.notifiaction import check_need_to_create_task_immediately
 from app.utils.state import PlanTrip
@@ -55,7 +56,9 @@ async def command_take_to_place(message: Message, state: FSMContext):
 
 @router.message(PlanTrip.travel_date)
 async def command_take_travel_date(message: Message, state: FSMContext):
-    datetime = await check_validation_travel_datetime(message.text, message)
+    trip_data = await state.get_data()
+    tz = get_timezone(trip_data['from_place'])
+    datetime = await check_validation_travel_datetime(message.text, tz, message)
     if datetime:
         await state.update_data(travel_date=datetime)
         await state.set_state(PlanTrip.notification_before_travel)

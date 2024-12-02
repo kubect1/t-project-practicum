@@ -1,10 +1,8 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.transport_enum import TransportEnum
-
-class Coordinates(BaseModel):
-    latitude: str = Field(...)
-    longitude: str = Field(...)
+from app.schemas.coordinates import Coordinates
+from app.utils.get_timezone import get_timezone
 
 
 class TripBase(BaseModel):
@@ -20,8 +18,9 @@ class TripBase(BaseModel):
     isEnded: bool = Field(...)
 
     def __str__(self):
+        tz: timezone = get_timezone(self.from_place)
         return (self.from_place_title + '  -->  ' + self.to_place_title + ' : ' +
-                f'At {self.travel_date}\nCompleted: {'Yes' if self.isEnded else 'No'}')
+                f'At {tz.fromutc(self.travel_date).replace(tzinfo=None)}\nCompleted: {'Yes' if self.isEnded else 'No'}')
 
     def get_info(self):
         return (str(self) + '\n' +

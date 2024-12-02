@@ -1,6 +1,8 @@
 from aiogram.types import Message
 import datetime as dt
-from app.schemas.trip import TransportEnum, Coordinates
+from app.schemas.trip import TransportEnum
+from app.schemas.coordinates import Coordinates
+from app.utils.get_timezone import timezone_adaptation
 
 
 async def check_validation_string(string: str, message: Message) -> bool:
@@ -15,10 +17,11 @@ async def check_validation_string(string: str, message: Message) -> bool:
 
     return correct_date
 
-async def check_validation_travel_datetime(date_time: str, message: Message) -> dt.datetime | None:
+async def check_validation_travel_datetime(date_time: str, timezone: dt.timezone, message: Message) -> dt.datetime | None:
     try:
         date, time = date_time.split()
         datetime = dt.datetime.fromisoformat(date + 'T' + time)
+        datetime = timezone_adaptation(datetime, timezone)
     except ValueError:
         await message.answer("Incorrect format")
         return

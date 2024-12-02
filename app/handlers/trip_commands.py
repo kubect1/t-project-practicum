@@ -10,6 +10,7 @@ from app.keyboards.reply import rmk, selection_notification_time
 
 from app.curd.trip import update_trip_by_id, delete_trip_by_id
 from app.schemas.trip import TransportEnum, TripRead
+from app.utils.get_timezone import get_timezone, timezone_adaptation
 from app.utils.notifiaction import check_need_to_create_task_immediately, cancel_notification
 
 from app.utils.state import TripMenu, MainMenu, ChangeTrip
@@ -177,6 +178,8 @@ async def command_change_location(message: Message, session: AsyncSession, state
                 trip.to_place = location
             case 'from':
                 trip.from_place = location
+                tz = get_timezone(location)
+                trip.datetime = timezone_adaptation(trip.datetime, tz)
         await save_change_trip(trip, message, session, state)
 
 
