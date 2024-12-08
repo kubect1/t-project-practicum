@@ -83,6 +83,7 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
     if await check_validation_transport_type(message.text, message):
         await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
         trip_data = await state.get_data()
+        
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,
