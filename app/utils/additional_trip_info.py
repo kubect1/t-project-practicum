@@ -1,5 +1,3 @@
-import json
-
 import aiohttp
 
 from app.schemas.trip import TripBase
@@ -30,13 +28,15 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                 ],
                 'route_mode': 'fastest',
                 'traffic_mode': 'statistics',
+                'transport': 'driving',
                 'output': 'summary'
             }
             url = f'http://routing.api.2gis.com/routing/7.0.0/global?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
+                    status = response.status
                     resp = response.json()
-            if resp == 'OK':
+            if status == 200:
                 result = dict(resp['result'])
                 duration = result['duration']
                 distance = result['length']
@@ -56,13 +56,15 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                     }
                 },
                 'transport': 'bus',
+                'max_result_count': 1
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
+                    status = response.status
                     resp = response.json()
-            if resp['status'] == 'OK':
-                result = dict(resp['result'])
+            if status == 200:
+                result = dict(resp[0])
                 duration = result['total_duration']
                 distance = result['total_distance']
 
@@ -81,13 +83,15 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                     }
                 },
                 'transport': 'metro',
+                'max_result_count': 1
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
+                    status = response.status
                     resp = response.json()
-            if resp['status'] == 'OK':
-                result = dict(resp['result'])
+            if status == 200:
+                result = dict(resp[0])
                 duration = result['total_duration']
                 distance = result['total_distance']
         case TransportEnum.plane:
