@@ -11,7 +11,6 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
     """
     Return total_distance in meters and total_duration in seconds
     """
-    url = f'http://routing.api.2gis.com/routing/7.0.0/global?key={settings.telegram_bot_token}'
     duration = None
     distance = None
     match trip.transport_type:
@@ -33,6 +32,7 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                 'traffic_mode': 'statistics',
                 'output': 'summary'
             }
+            url = f'http://routing.api.2gis.com/routing/7.0.0/global?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
                     resp = response.json()
@@ -57,6 +57,7 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                 },
                 'transport': 'bus',
             }
+            url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
                     resp = response.json()
@@ -81,6 +82,7 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
                 },
                 'transport': 'metro',
             }
+            url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(url=url, body=body) as response:
                     resp = response.json()
