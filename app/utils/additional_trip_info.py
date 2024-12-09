@@ -1,29 +1,27 @@
 import aiohttp
 
-from app.schemas.trip import TripBase
 from app.core.config import settings
 from app.models.transport_enum import TransportEnum
+from app.schemas.route import Route
+from app.schemas.coordinates import Coordinates
 
 
-def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
-    """
-    Return total_distance in meters and total_duration in seconds
-    """
-    duration = None
-    distance = None
-    match trip.transport_type:
+async def get_route_info(source: Coordinates, target: Coordinates, transport: TransportEnum) -> Route:
+    duration = 0
+    distance = 0
+    match transport:
         case TransportEnum.car:
             body = {
                 'points': [
                     {
                         'type': "stop",
-                        'lon': trip.from_place.longitude,
-                        'lat': trip.from_place.latitude
+                        'lon': source.longitude,
+                        'lat': source.latitude
                     },
                     {
                         'type': "stop",
-                        'lon': trip.to_place.longitude,
-                        'lat': trip.to_place.latitude
+                        'lon': target.longitude,
+                        'lat': target.latitude
                     }
                 ],
                 'route_mode': 'fastest',
@@ -33,9 +31,9 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             }
             url = f'http://routing.api.2gis.com/routing/7.0.0/global?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, body=body) as response:
+                async with session.post(url=url, json=body) as response:
                     status = response.status
-                    resp = response.json()
+                    resp = await response.json()
             if status == 200:
                 result = dict(resp['result'])
                 duration = result['duration']
@@ -45,14 +43,14 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             body = {
                 'source': {
                     'point': {
-                        'lat': trip.from_place.latitude,
-                        'lon': trip.from_place.longitude
+                        'lat': source.latitude,
+                        'lon': source.longitude
                     }
                 },
                 'target': {
                     'point': {
-                        'lat': trip.to_place.latitude,
-                        'lon': trip.to_place.longitude
+                        'lat': target.latitude,
+                        'lon': target.longitude
                     }
                 },
                 'transport': 'bus',
@@ -60,9 +58,9 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, body=body) as response:
+                async with session.post(url=url, json=body) as response:
                     status = response.status
-                    resp = response.json()
+                    resp = await response.json()
             if status == 200:
                 result = dict(resp[0])
                 duration = result['total_duration']
@@ -72,14 +70,14 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             body = {
                 'source': {
                     'point': {
-                        'lat': trip.from_place.latitude,
-                        'lon': trip.from_place.longitude
+                        'lat': source.latitude,
+                        'lon': source.longitude
                     }
                 },
                 'target': {
                     'point': {
-                        'lat': trip.to_place.latitude,
-                        'lon': trip.to_place.longitude
+                        'lat': target.latitude,
+                        'lon': target.longitude
                     }
                 },
                 'transport': 'metro',
@@ -87,9 +85,9 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, body=body) as response:
+                async with session.post(url=url, json=body) as response:
                     status = response.status
-                    resp = response.json()
+                    resp = await response.json()
             if status == 200:
                 result = dict(resp[0])
                 duration = result['total_duration']
@@ -98,4 +96,4 @@ def get_route_info(trip: TripBase) -> tuple[int, int] | tuple[None, None]:
             pass
         case TransportEnum.train:
             pass
-    return distance, duration
+    return Route(distance=distance, duration=duration)

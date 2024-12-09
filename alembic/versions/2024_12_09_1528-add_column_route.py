@@ -1,8 +1,8 @@
-"""empty message
+"""add column route
 
-Revision ID: 234b383390a3
+Revision ID: 5aa93df9d53f
 Revises: 88a0f6bce924
-Create Date: 2024-12-08 17:30:54.319434
+Create Date: 2024-12-09 15:28:36.735414
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '234b383390a3'
+revision: str = '5aa93df9d53f'
 down_revision: Union[str, None] = '88a0f6bce924'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

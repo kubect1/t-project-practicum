@@ -8,6 +8,7 @@ from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 from app.models.transport_enum import TransportEnum
 from app.schemas.trip import TripBase, TripRead
+from app.utils.additional_trip_info import get_route_info
 from app.utils.get_timezone import get_timezone
 from app.utils.navigation_states import to_menu_bar
 from app.utils.notifiaction import check_need_to_create_task_immediately
@@ -83,12 +84,13 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
     if await check_validation_transport_type(message.text, message):
         await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
         trip_data = await state.get_data()
-        
+        route = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,
                 create_date=message.date.replace(tzinfo=None),
                 isEnded=False,
+                route=route,
                 **trip_data
             ),
             session=session
@@ -97,7 +99,7 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
             await message.answer("It is impossible to create trip")
         else:
             created_trip = TripRead.model_validate(created_trip)
-            check_need_to_create_task_immediately(created_trip)
+            await check_need_to_create_task_immediately(created_trip)
             await message.answer(created_trip.get_info())
             await message.answer("The trip was saved")
         await to_menu_bar(message, state)

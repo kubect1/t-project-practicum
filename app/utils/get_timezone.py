@@ -2,7 +2,7 @@ import pytz
 
 from app.schemas.coordinates import Coordinates
 from timezonefinder import TimezoneFinder
-import datetiem as dt
+import datetime as dt
 
 def get_timezone(location: Coordinates) -> pytz.timezone:
     tz_finder = TimezoneFinder()

@@ -25,11 +25,14 @@ class TripBase(BaseModel):
                 f'At {tz.fromutc(self.travel_date).replace(tzinfo=None)}\nCompleted: {'Yes' if self.isEnded else 'No'}')
 
     def get_info(self):
-        return (str(self) + '\n' +
+        info = (str(self) + '\n' +
                 f'time for notification before travel: {self.notification_before_travel - datetime.fromisoformat('1970-01-01')}' + '\n' +
-                f'type of transport: {self.transport_type.name}' + '\n' +
-                f'travel time in seconds: {self.route.duration}' + '\n' +
+                f'type of transport: {self.transport_type.name}' + '\n')
+        if self.route.distance != 0 and self.route.duration != 0:
+            info += (f'travel time in seconds: {self.route.duration}' + '\n' +
                 f'route length in meters: {self.route.distance}')
+        return info
+
 
 
 class TripRead(TripBase):

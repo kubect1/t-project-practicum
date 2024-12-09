@@ -134,8 +134,8 @@ async def save_change_trip(trip: TripRead, message: Message, session: AsyncSessi
         if old_notification_time != new_notification_time:
             last_check_time = get_last_check_notification_time()
             if old_notification_time <= (last_check_time + right_border):
-                cancel_notification(trip)
-            check_need_to_create_task_immediately(new_trip)
+                await cancel_notification(trip)
+            await check_need_to_create_task_immediately(new_trip)
         await message.answer('Trip changed successfully')
         await message.answer(new_trip.get_info())
         return new_trip
@@ -188,10 +188,11 @@ async def command_change_location(message: Message, session: AsyncSession, state
 
 @router.message(ChangeTrip.travel_date)
 async def command_change_travel_date(message: Message, session: AsyncSession, state: FSMContext):
-    datetime = await check_validation_travel_datetime(message.text, message)
+    state_data = await state.get_data()
+    trip = state_data['trip']
+    tz = get_timezone(trip.from_place)
+    datetime = await check_validation_travel_datetime(message.text, tz, message)
     if datetime:
-        state_data = await state.get_data()
-        trip = state_data['trip']
         trip.travel_date = datetime
         await save_change_trip(trip, message, session, state)
 
