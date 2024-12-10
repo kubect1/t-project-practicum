@@ -27,7 +27,7 @@ async def command_take_from_place_title(message: Message, state: FSMContext):
         await message.answer("Send the location of the place with an attachment", reply_markup=rmk)
 
 
-@router.message(PlanTrip.from_place, F.location)
+@router.message(PlanTrip.from_place)
 async def command_take_from_place(message: Message, state: FSMContext):
     location = await check_validation_location(message)
     if location:
@@ -46,7 +46,7 @@ async def command_take_to_place_title(message: Message, state: FSMContext):
         await message.answer("Send the location of the place with an attachment", reply_markup=rmk)
 
 
-@router.message(PlanTrip.to_place, F.location)
+@router.message(PlanTrip.to_place)
 async def command_take_to_place(message: Message, state: FSMContext):
     location = await check_validation_location(message)
     if location:

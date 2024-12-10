@@ -15,13 +15,13 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
                 'points': [
                     {
                         'type': "stop",
-                        'lon': source.longitude,
-                        'lat': source.latitude
+                        'lon': float(source.longitude),
+                        'lat': float(source.latitude)
                     },
                     {
                         'type': "stop",
-                        'lon': target.longitude,
-                        'lat': target.latitude
+                        'lon': float(target.longitude),
+                        'lat': float(target.latitude)
                     }
                 ],
                 'route_mode': 'fastest',
@@ -35,7 +35,7 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
                     status = response.status
                     resp = await response.json()
             if status == 200:
-                result = dict(resp['result'])
+                result = resp['result'][0]
                 duration = result['duration']
                 distance = result['length']
 
@@ -43,17 +43,17 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
             body = {
                 'source': {
                     'point': {
-                        'lat': source.latitude,
-                        'lon': source.longitude
+                        'lat': float(source.latitude),
+                        'lon': float(source.longitude)
                     }
                 },
                 'target': {
                     'point': {
-                        'lat': target.latitude,
-                        'lon': target.longitude
+                        'lat': float(target.latitude),
+                        'lon': float(target.longitude)
                     }
                 },
-                'transport': 'bus',
+                'transport': ['bus'],
                 'max_result_count': 1
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
@@ -70,17 +70,17 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
             body = {
                 'source': {
                     'point': {
-                        'lat': source.latitude,
-                        'lon': source.longitude
+                        'lat': float(source.latitude),
+                        'lon': float(source.longitude)
                     }
                 },
                 'target': {
                     'point': {
-                        'lat': target.latitude,
-                        'lon': target.longitude
+                        'lat': float(target.latitude),
+                        'lon': float(target.longitude)
                     }
                 },
-                'transport': 'metro',
+                'transport': ['metro'],
                 'max_result_count': 1
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
