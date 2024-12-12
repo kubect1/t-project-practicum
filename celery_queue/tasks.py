@@ -1,5 +1,6 @@
 import asyncio
-import requests
+
+import aiohttp
 import redis
 import datetime as dt
 
@@ -17,7 +18,7 @@ last_check_notification = 'last_check_notification'
 
 
 @shared_task()
-def check_notification_to_send():
+async def check_notification_to_send():
     session = AsyncSessionLocal()
     trips = asyncio.run(get_all_trips(session))
     trips = [TripRead.model_validate(trip) for trip in trips]
@@ -32,17 +33,20 @@ def check_notification_to_send():
 
 
 @shared_task()
-def send_notification_trip(trip):
+async def send_notification_trip(trip):
     trip: TripRead = TripRead.model_validate_json(trip)
     url = f'https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage'
     params = {
         'chat_id': trip.chat_id,
         'text': 'You have a scheduled trip with early start time coming up:' + '\n' + trip.get_info()
     }
-    response = requests.post(url, params=params)
-    return response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, params=params) as response:
+            result = response.json()
+    return result
 
-def get_last_check_notification_time() -> dt.datetime | None:
+
+async def get_last_check_notification_time() -> dt.datetime | None:
     last_run_time = redis_client.get(last_check_notification)
     if last_run_time:
         last_run_time = last_run_time.decode('utf-8')

@@ -61,7 +61,12 @@ selection_field_for_change = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='from place title'),
-            KeyboardButton(text='to place title')
+            KeyboardButton(text='from place'),
+
+        ],
+        [
+            KeyboardButton(text='to place title'),
+            KeyboardButton(text='to place'),
         ],
         [
             KeyboardButton(text='travel date'),
