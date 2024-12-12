@@ -62,5 +62,10 @@ async def to_mark_traveled(message: Message, state: FSMContext):
     await message.answer("Confirm action?", reply_markup=confirm_kb)
 
 async def to_change_location(message: Message, state: FSMContext):
-    await state.set_state(ChangeTrip.location)
+    match message.text:
+        case 'to place':
+            await state.set_state(ChangeTrip.to_place)
+        case 'from place':
+            await state.set_state(ChangeTrip.from_place)
+
     await message.answer('Send the location of the place with an attachment', reply_markup=rmk)

@@ -18,7 +18,9 @@ class PlanTrip(StatesGroup):
 
 class ChangeTrip(StatesGroup):
     from_place_title = State()
+    from_place = State()
     to_place_title = State()
+    to_place = State()
     travel_date = State()
     notification_before_travel = State()
     transport_type = State()

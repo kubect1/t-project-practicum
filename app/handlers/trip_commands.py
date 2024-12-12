@@ -62,9 +62,13 @@ async def command_modify_trip(message: Message, state: FSMContext):
         case 'from place title':
             await message.answer('Enter new from place title')
             await state.set_state(ChangeTrip.from_place_title)
+        case 'from place':
+            await to_change_location(message, state)
         case 'to place title':
             await message.answer('Enter new to place title')
             await state.set_state(ChangeTrip.to_place_title)
+        case 'to place':
+            await to_change_location(message, state)
         case 'travel date':
             await message.answer('Enter new travel date and new time in format: "YYYY-MM-DD HH:MM:SS", without quotation marks',
                                  reply_markup=rmk)
@@ -124,7 +128,7 @@ async def command_mark_travelled(message: Message, session: AsyncSession, state:
             await to_selected_trip_bar(message, state)
 
 
-async def save_change_trip(trip: TripRead, message: Message, session: AsyncSession, state: FSMContext) -> TripRead | None:
+async def save_change_trip(trip: TripRead, message: Message, session: AsyncSession, state: FSMContext) -> None:
     new_trip = await update_trip_by_id(trip.id, trip, session)
     if new_trip:
         new_trip = TripRead.model_validate(new_trip)
@@ -139,48 +143,39 @@ async def save_change_trip(trip: TripRead, message: Message, session: AsyncSessi
             await check_need_to_create_task_immediately(new_trip)
         await message.answer('Trip changed successfully')
         await message.answer(new_trip.get_info())
-        return new_trip
     else:
         await message.answer("It is impossible to change trip")
     await to_menu_bar(message, state)
 
 @router.message(ChangeTrip.from_place_title)
-async def command_change_from_place_title(message: Message, state: FSMContext):
+async def command_change_from_place_title(message: Message, session: AsyncSession, state: FSMContext):
     if await check_validation_string(message.text, message):
         state_data = await state.get_data()
         trip = state_data['trip']
         trip.from_place_title = message.text
         await state.update_data(trip=trip)
-        await state.update_data(type_place='from')
-        await to_change_location(message, state)
+        await save_change_trip(trip, message, session, state)
 
 
 @router.message(ChangeTrip.to_place_title)
-async def command_change_to_place_title(message: Message, state: FSMContext):
+async def command_change_to_place_title(message: Message, session: AsyncSession, state: FSMContext):
     if await check_validation_string(message.text, message):
         state_data = await state.get_data()
         trip = state_data['trip']
         trip.to_place_title = message.text
         await state.update_data(trip=trip)
-        await state.update_data(type_place='to')
-        await state.set_state(ChangeTrip.location)
-        await message.answer('Send the location of the place with an attachment', reply_markup=rmk)
+        await save_change_trip(trip, message, session, state)
 
 
-@router.message(ChangeTrip.location)
-async def command_change_location(message: Message, session: AsyncSession, state: FSMContext):
+@router.message(ChangeTrip.from_place)
+async def command_change_from_place(message: Message, session: AsyncSession, state: FSMContext):
     location = await check_validation_location(message)
     if location:
         state_data = await state.get_data()
         trip = state_data['trip']
-        type_place = state_data['type_place']
-        match type_place:
-            case 'to':
-                trip.to_place = location
-            case 'from':
-                trip.from_place = location
-                tz = get_timezone(location)
-                trip.travel_date = timezone_adaptation(trip.travel_date, tz)
+        trip.from_place = location
+        tz = get_timezone(location)
+        trip.travel_date = timezone_adaptation(trip.travel_date, tz)
         route, bad_status = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
         if bad_status:
             await message.answer("It is impossible to set route")
@@ -189,6 +184,19 @@ async def command_change_location(message: Message, session: AsyncSession, state
         await save_change_trip(trip, message, session, state)
 
 
+@router.message(ChangeTrip.to_place)
+async def command_change_from_place(message: Message, session: AsyncSession, state: FSMContext):
+    location = await check_validation_location(message)
+    if location:
+        state_data = await state.get_data()
+        trip = state_data['trip']
+        trip.to_place = location
+        route, bad_status = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
+        if bad_status:
+            await message.answer("It is impossible to set route")
+            await message.answer("Try changing location later")
+        trip.route = route
+        await save_change_trip(trip, message, session, state)
 
 
 
