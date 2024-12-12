@@ -8,6 +8,7 @@ from app.keyboards.builders import reply_builder
 from app.keyboards.reply import rmk, selection_notification_time
 from app.models.transport_enum import TransportEnum
 from app.schemas.trip import TripBase, TripRead
+from app.schemas.route import Route
 from app.utils.additional_trip_info import get_route_info
 from app.utils.get_timezone import get_timezone
 from app.utils.navigation_states import to_menu_bar
@@ -85,6 +86,12 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
         await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
         trip_data = await state.get_data()
         route = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
+        if route is None:
+            route = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
+        if route is None:
+            await message.answer("It is impossible to get route")
+            await message.answer("Try changing location later")
+            route = Route(distance=0, duration=0)
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,

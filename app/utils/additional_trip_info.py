@@ -38,7 +38,9 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
                 result = resp['result'][0]
                 duration = result['duration']
                 distance = result['length']
-
+            else:
+                return None
+            
         case TransportEnum.bus:
             body = {
                 'source': {
@@ -65,6 +67,8 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
                 result = dict(resp[0])
                 duration = result['total_duration']
                 distance = result['total_distance']
+            else:
+                return None
 
         case TransportEnum.subway:
             body = {
@@ -92,6 +96,9 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
                 result = dict(resp[0])
                 duration = result['total_duration']
                 distance = result['total_distance']
+            else:
+                return None
+
         case TransportEnum.plane:
             pass
         case TransportEnum.train:

@@ -10,9 +10,10 @@ from app.keyboards.reply import rmk, selection_notification_time
 
 from app.curd.trip import update_trip_by_id, delete_trip_by_id
 from app.schemas.trip import TransportEnum, TripRead
+from app.schemas.route import Route
 from app.utils.get_timezone import get_timezone, timezone_adaptation
 from app.utils.notifiaction import check_need_to_create_task_immediately, cancel_notification
-
+from app.utils.additional_trip_info import get_route_info
 from app.utils.state import TripMenu, MainMenu, ChangeTrip
 from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_trip, to_mark_traveled, \
     to_selected_trip_bar, \
@@ -180,6 +181,14 @@ async def command_change_location(message: Message, session: AsyncSession, state
                 trip.from_place = location
                 tz = get_timezone(location)
                 trip.datetime = timezone_adaptation(trip.datetime, tz)
+        route = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
+        if route is None:
+            route = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
+        if route is None:
+            await message.answer("It is impossible to set route")
+            await message.answer("Try changing location later")
+            route = Route(distance=0, duration=0)
+        trip.route = route
         await save_change_trip(trip, message, session, state)
 
 
