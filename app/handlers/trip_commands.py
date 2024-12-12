@@ -180,14 +180,11 @@ async def command_change_location(message: Message, session: AsyncSession, state
             case 'from':
                 trip.from_place = location
                 tz = get_timezone(location)
-                trip.datetime = timezone_adaptation(trip.datetime, tz)
-        route = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
-        if route is None:
-            route = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
-        if route is None:
+                trip.travel_date = timezone_adaptation(trip.travel_date, tz)
+        route, bad_status = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
+        if bad_status:
             await message.answer("It is impossible to set route")
             await message.answer("Try changing location later")
-            route = Route(distance=0, duration=0)
         trip.route = route
         await save_change_trip(trip, message, session, state)
 
@@ -223,5 +220,10 @@ async def command_change_transport_type(message: Message, session: AsyncSession,
         state_data = await state.get_data()
         trip = state_data['trip']
         trip.transport_type = TransportEnum(getattr(TransportEnum, message.text))
+        route, bad_status = await get_route_info(trip.from_place, trip.to_place, trip.transport_type)
+        if bad_status:
+            await message.answer("It is impossible to set route")
+            await message.answer("Try changing location later")
+        trip.route = route
         await save_change_trip(trip, message, session, state)
 

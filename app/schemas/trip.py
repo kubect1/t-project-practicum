@@ -29,19 +29,19 @@ class TripBase(BaseModel):
                 f'time for notification before travel: {self.notification_before_travel - datetime.fromisoformat('1970-01-01')}' + '\n' +
                 f'type of transport: {self.transport_type.name}' + '\n')
         if self.route.distance != 0 and self.route.duration != 0:
-            if (self.route.duration > 3600):
-                info += f'travel time: {(int)(self.route.duration/3600)} hours, {(int)(self.route.duration%3600)} minutes\n'
-            elif (self.route.duration > 60):
-                info += f'travel time: {(int)(self.route.duration/60)} minutes, {(int)(self.route.duration%60)} seconds\n'
+            if self.route.duration > 3600:
+                info += f'travel time: {(self.route.duration // 3600)} hours, {(self.route.duration % 3600) // 60} minutes\n'
+            elif self.route.duration > 60:
+                info += f'travel time: {(self.route.duration // 60)} minutes, {self.route.duration % 60} seconds\n'
             else:
-                info += f'travel time: {(int)(self.route.duration)} seconds\n'
+                info += f'travel time: {self.route.duration} seconds\n'
 
-            if (self.route.distance > 1000):
-                info += f'route length: {self.route.distance / 1000} kilometers'
+            if self.route.distance > 1000:
+                info += f'route length: {round(self.route.distance / 1000, 1)} kilometers'
             else:
                 info += f'route length: {self.route.distance} meters'
         else:
-            info = f'no info on route'
+            info += f'no info on route'
         return info
 
 

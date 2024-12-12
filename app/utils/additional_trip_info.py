@@ -6,9 +6,9 @@ from app.schemas.route import Route
 from app.schemas.coordinates import Coordinates
 
 
-async def get_route_info(source: Coordinates, target: Coordinates, transport: TransportEnum) -> Route:
-    duration = 0
-    distance = 0
+async def get_route_info(source: Coordinates, target: Coordinates, transport: TransportEnum) -> tuple[Route, bool]:
+    count_try = 2
+    bad_request_status = False
     match transport:
         case TransportEnum.car:
             body = {
@@ -31,15 +31,18 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
             }
             url = f'http://routing.api.2gis.com/routing/7.0.0/global?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, json=body) as response:
-                    status = response.status
-                    resp = await response.json()
-            if status == 200:
-                result = resp['result'][0]
-                duration = result['duration']
-                distance = result['length']
-            else:
-                return None
+                for i in range(count_try):
+                    async with session.post(url=url, json=body) as response:
+                        status = response.status
+                        resp = await response.json()
+                    if status == 200:
+                        result = resp['result'][0]
+                        duration = result['duration']
+                        distance = result['length']
+                        return Route(distance=distance, duration=duration), bad_request_status
+                bad_request_status = True
+                return Route(distance=0, duration=0), bad_request_status
+
             
         case TransportEnum.bus:
             body = {
@@ -60,15 +63,17 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, json=body) as response:
-                    status = response.status
-                    resp = await response.json()
-            if status == 200:
-                result = dict(resp[0])
-                duration = result['total_duration']
-                distance = result['total_distance']
-            else:
-                return None
+                for i in range(count_try):
+                    async with session.post(url=url, json=body) as response:
+                        status = response.status
+                        resp = await response.json()
+                    if status == 200:
+                        result = dict(resp[0])
+                        duration = result['total_duration']
+                        distance = result['total_distance']
+                        return Route(distance=distance, duration=duration), bad_request_status
+                bad_request_status = True
+                return Route(distance=0, duration=0), bad_request_status
 
         case TransportEnum.subway:
             body = {
@@ -89,18 +94,19 @@ async def get_route_info(source: Coordinates, target: Coordinates, transport: Tr
             }
             url = f'https://routing.api.2gis.com/public_transport/2.0?key={settings.double_gis_key}'
             async with aiohttp.ClientSession() as session:
-                async with session.post(url=url, json=body) as response:
-                    status = response.status
-                    resp = await response.json()
-            if status == 200:
-                result = dict(resp[0])
-                duration = result['total_duration']
-                distance = result['total_distance']
-            else:
-                return None
+                for i in range(count_try):
+                    async with session.post(url=url, json=body) as response:
+                        status = response.status
+                        resp = await response.json()
+                    if status == 200:
+                        result = dict(resp[0])
+                        duration = result['total_duration']
+                        distance = result['total_distance']
+                        return Route(distance=distance, duration=duration), bad_request_status
+                bad_request_status = True
+                return Route(distance=0, duration=0), bad_request_status
 
         case TransportEnum.plane:
-            pass
+            return Route(distance=0, duration=0), bad_request_status
         case TransportEnum.train:
-            pass
-    return Route(distance=distance, duration=duration)
+            return Route(distance=0, duration=0), bad_request_status

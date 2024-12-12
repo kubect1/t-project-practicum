@@ -85,13 +85,10 @@ async def command_take_transport_type(message: Message, session: AsyncSession, s
     if await check_validation_transport_type(message.text, message):
         await state.update_data(transport_type=TransportEnum(getattr(TransportEnum, message.text)))
         trip_data = await state.get_data()
-        route = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
-        if route is None:
-            route = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
-        if route is None:
+        route, bad_status = await get_route_info(trip_data['from_place'], trip_data['to_place'], trip_data['transport_type'])
+        if bad_status:
             await message.answer("It is impossible to get route")
             await message.answer("Try changing location later")
-            route = Route(distance=0, duration=0)
         created_trip = await create_trip(
             new_trip=TripBase(
                 chat_id =message.from_user.id,
