@@ -69,7 +69,9 @@ async def command_take_travel_date(message: Message, state: FSMContext):
 
 @router.message(PlanTrip.notification_before_travel)
 async def command_take_notification_before_travel(message: Message, state: FSMContext):
-    datetime = await check_validation_notification_time(message.text, message)
+    data = await state.get_data()
+    travel_date = data['travel_date']
+    datetime = await check_validation_notification_time(message.text, travel_date, message)
     if datetime:
         await state.update_data(notification_before_travel=datetime)
         await state.set_state(PlanTrip.transport_type)

@@ -1,8 +1,9 @@
 import pytz
 
-from app.schemas.coordinates import Coordinates
-from timezonefinder import TimezoneFinder
 import datetime as dt
+from timezonefinder import TimezoneFinder
+
+from app.schemas.coordinates import Coordinates
 
 def get_timezone(location: Coordinates) -> pytz.timezone:
     tz_finder = TimezoneFinder()
@@ -12,8 +13,8 @@ def get_timezone(location: Coordinates) -> pytz.timezone:
     timezone = pytz.timezone(timezone_str)
     return timezone
 
-def timezone_adaptation(datetime, timezone) -> dt.datetime:
-    datetime = datetime.replace(tzinfo=timezone)
+def timezone_adaptation(datetime: dt.datetime, timezone: pytz.tzinfo.DstTzInfo) -> dt.datetime:
+    datetime = timezone.localize(datetime, True)
     datetime = datetime.astimezone(dt.timezone.utc)
     datetime = datetime.replace(tzinfo=None)
     return datetime

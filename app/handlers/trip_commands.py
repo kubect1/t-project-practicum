@@ -18,7 +18,8 @@ from app.utils.navigation_states import to_menu_bar, to_modify_trip, to_delete_t
     to_selected_trip_bar, \
     to_planned_trip_bar, to_change_location
 from app.utils.validation import check_validation_string, check_validation_travel_datetime, \
-    check_validation_transport_type, check_validation_number_of_trip, check_validation_location
+    check_validation_transport_type, check_validation_number_of_trip, check_validation_location, \
+    check_validation_notification_time
 
 from celery_queue.tasks import get_last_check_notification_time, right_border
 
@@ -212,10 +213,10 @@ async def command_change_travel_date(message: Message, session: AsyncSession, st
 
 @router.message(ChangeTrip.notification_before_travel)
 async def command_change_notification_before_travel(message: Message, session: AsyncSession, state: FSMContext):
-    datetime = await check_validation_string(message.text, message)
+    state_data = await state.get_data()
+    trip = state_data['trip']
+    datetime = await check_validation_notification_time(message.text, trip.travel_date, message)
     if datetime:
-        state_data = await state.get_data()
-        trip = state_data['trip']
         trip.notification_before_travel = datetime
         await save_change_trip(trip, message, session, state)
 

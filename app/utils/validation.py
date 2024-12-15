@@ -1,5 +1,7 @@
 from aiogram.types import Message
 import datetime as dt
+from pytz.tzinfo import DstTzInfo
+
 from app.schemas.trip import TransportEnum
 from app.schemas.coordinates import Coordinates
 from app.utils.get_timezone import timezone_adaptation
@@ -17,23 +19,23 @@ async def check_validation_string(string: str, message: Message) -> bool:
 
     return correct_date
 
-async def check_validation_travel_datetime(date_time: str, timezone: dt.timezone, message: Message) -> dt.datetime | None:
+async def check_validation_travel_datetime(date_time: str, timezone: DstTzInfo, message: Message) -> dt.datetime | None:
     try:
         date, time = date_time.split()
         datetime = dt.datetime.fromisoformat(date + 'T' + time)
-        datetime = timezone_adaptation(datetime, timezone)
     except ValueError:
         await message.answer("Incorrect format")
         return
+    datetime = timezone_adaptation(datetime, timezone)
     if datetime <= message.date.replace(tzinfo=None):
         await message.answer("Time in past cannot be specified")
         return
     if datetime > dt.datetime.fromisoformat("2100-01-01"):
         await message.answer("Travel time must be less than 2100 years")
         return
-    return datetime.fromisoformat(date + 'T' + time)
+    return datetime
 
-async def check_validation_notification_time(time: str, message: Message) -> dt.datetime | None:
+async def check_validation_notification_time(time: str, travel_date: dt.datetime, message: Message) -> dt.datetime | None:
     days = hours = minutes = seconds = 0
     match time:
         case '10 minutes':
@@ -51,6 +53,9 @@ async def check_validation_notification_time(time: str, message: Message) -> dt.
     timedelta_value = dt.timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
     if not (dt.timedelta(seconds=1) <= timedelta_value <= dt.timedelta(days=365)):
         await message.answer("The notification time can be from 1 second to 1 year")
+        return
+    if travel_date - timedelta_value <= message.date.replace(tzinfo=None):
+        await message.answer("Notification time in past cannot be specified")
         return
     return dt.datetime.fromisoformat('1970-01-01') + timedelta_value
 
@@ -82,7 +87,7 @@ async def check_validation_location(message: Message) -> Coordinates | None:
         location = Coordinates(latitude=str(message.location.latitude),
                                longitude=str(message.location.longitude))
         return location
-    except ValueError:
+    except AttributeError:
         await message.answer('Send the location')
         return
 
